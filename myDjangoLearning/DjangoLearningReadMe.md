@@ -44,3 +44,35 @@
 
 #### 2.3.9 templates 文件夹:
 views.py中的函数渲染templates中的Html模板，得到动态内容的网页
+
+<br/>
+
+## 3.Django的运作过程:
+### 3.1.Django开始运行:
+先加载Django的settings,再创建WSGIServer实例,调用serve_forever()方法启动http服务
+
+### 3.2.Django处理请求的流程:
+* 1.用户通过浏览器请求一个页面
+* 2.请求到达RequestMiddlewares,中间件对request预处理或者直接response
+* 3.预处理以后URLConf通过urls.py文件和request里的url找到相应的view
+* 4.ViewMiddlewares被访问,同样可以对request做预处理或者直接response
+* 5.调用view的函数
+* 6.View可以通过models访问底层的数据,model和db的交互都是通过manager
+* 7.如何需要,views可以使用一个特殊的context传给template生成页面,然后再把输出返回给view
+* 8.httpResponse被发送回到ResponseMiddlewares
+* 9.response被返回给浏览器,将结果呈现给用户
+
+### 3.3.流程重点部分解析:
+#### 3.3.1. Middleware(中间件)
+middleware可以参数的阶段有4个:reqeust/view/response/exception<br/>
+中间件在settings.py的MIDDLEWARE_CLASSES定义,使用完整的python类路径,中间件可以为空<br/>
+中间件的配置顺序很重要,从request到view的顺序调用的,而exception和response是逆序调用的
+<br/>
+
+#### 3.3.2. URLConf(URL映射)
+如果处理request的中间件都没有返回response,那么Django回去解析用户请求的url.<br/>
+URLConf是Django网站的目录,是url和view之间的映射表,以便Django能知道哪个url要调用哪段代码.<br/>
+具体配置在settings.py文件的ROOT_URLCONF常量里配置
+
+#### 3.3.2. Template(模板)
+非python代码实现,而是通过filter和template tag实现<br/>
